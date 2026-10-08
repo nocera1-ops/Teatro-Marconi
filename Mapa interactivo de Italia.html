@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mapa interactivo de Italia</title>
+<style>
+  :root{
+    --sea:#0f2a33; --paper:#f6ede0;
+    --north:#2f7a63; --center:#c08a2e; --south:#b2502f; --island:#6a4c7a;
+    --stroke: rgba(246,237,224,.85);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; min-height:100%;
+    background: radial-gradient(1200px 800px at 20% -10%, #1c3b46 0%, var(--sea) 55%, #09181d 100%);
+    color: var(--paper);
+    font-family: "Iowan Old Style","Palatino Linotype",Georgia,serif;
+    padding: calc(28px + env(safe-area-inset-top,0px)) 20px calc(32px + env(safe-area-inset-bottom,0px));
+    display:flex; flex-direction:column; align-items:center; gap:20px;
+  }
+  header{max-width:620px; text-align:center}
+  h1{font-size:clamp(26px,4.2vw,36px); margin:0 0 8px; font-weight:600}
+  p.lead{margin:0; opacity:.78; font-size:15px; line-height:1.5; font-family:-apple-system,"Segoe UI",sans-serif}
+
+  .legend{display:flex; gap:16px; flex-wrap:wrap; justify-content:center; font-size:13px; opacity:.85; font-family:-apple-system,"Segoe UI",sans-serif}
+  .legend span{display:inline-flex; align-items:center; gap:6px}
+  .swatch{width:10px; height:10px; border-radius:2px; display:inline-block}
+
+  .map-wrap{width:100%; max-width:360px;}
+  svg{width:100%; height:auto; overflow:visible}
+  path.region{
+    stroke: var(--stroke); stroke-width:4; stroke-linejoin:round;
+    cursor:pointer; transition: filter .12s ease, transform .12s ease;
+    transform-box: fill-box; transform-origin: center;
+  }
+  path.region:hover, path.region:focus-visible{
+    filter:brightness(1.25); transform: scale(1.015); outline:none;
+  }
+  .north{fill:var(--north)} .center{fill:var(--center)} .south{fill:var(--south)} .island{fill:var(--island)}
+
+  .list{
+    width:100%; max-width:620px; display:flex; flex-wrap:wrap; gap:8px; justify-content:center;
+    font-family:-apple-system,"Segoe UI",sans-serif;
+  }
+  .list a{
+    color:var(--paper); text-decoration:none; font-size:12.5px; font-weight:600;
+    padding:6px 11px; border-radius:999px; border:1px solid rgba(246,237,224,.25);
+    opacity:.9; transition: background .12s ease, opacity .12s ease;
+  }
+  .list a:hover{opacity:1; background:rgba(246,237,224,.12)}
+
+  footer{max-width:460px; text-align:center; font-size:12px; opacity:.55; font-family:-apple-system,"Segoe UI",sans-serif; line-height:1.6}
+  code{background:rgba(255,255,255,.08); padding:1px 5px; border-radius:4px}
+  a.credit{color:inherit; opacity:.8}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Un clic, una región</h1>
+  <p class="lead">Toca una región del mapa (o elige su nombre en la lista) para abrir el sitio que le hayas asignado.</p>
+</header>
+
+<div class="legend">
+  <span><i class="swatch" style="background:var(--north)"></i>Norte</span>
+  <span><i class="swatch" style="background:var(--center)"></i>Centro</span>
+  <span><i class="swatch" style="background:var(--south)"></i>Sur</span>
+  <span><i class="swatch" style="background:var(--island)"></i>Islas</span>
+</div>
+
+<div class="map-wrap">
+  <svg id="svg-map" viewBox="0 0 2657.2 3130.6" xmlns="http://www.w3.org/2000/svg"></svg>
+</div>
+
+<div class="list" id="list"></div>
+
+<footer>
+  Para cambiar a dónde lleva cada región, edita el objeto <code>REGIONES</code> en el HTML y sustituye cada <code>url</code> por tu enlace real.<br>
+  Límites administrativos: <a class="credit" href="https://github.com/openpolis/geojson-italy" target="_blank" rel="noopener">ISTAT / openpolis</a> (CC-BY), geometría simplificada.
+</footer>
+
+<script>
+  // ───────────────────────────────────────────────────────────
+  // EDITA AQUÍ: pon tu URL real en cada región (campo "url").
+  // ───────────────────────────────────────────────────────────
+  const REGIONES = [
+  { id:"piemonte", nombre:"Piamonte", grupo:"north", url:"https://example.com/piemonte", d:"M114,541 L113,470 L285,447 L280,333 L340,283 L325,247 L407,186 L406,250 L470,316 L431,392 L495,507 L461,537 L430,517 L424,565 L454,620 L505,607 L578,699 L576,745 L515,722 L483,778 L466,751 L363,766 L308,894 L146,882 L58,816 L51,765 L100,718 L0,594 L114,541 Z M464,619 L465,621 L464,618 L464,619 Z" },
+  { id:"valle-de-aosta", nombre:"Valle de Aosta", grupo:"north", url:"https://example.com/valle-de-aosta", d:"M91,349 L276,350 L285,447 L94,483 L40,399 L91,349 Z" },
+  { id:"liguria", nombre:"Liguria", grupo:"north", url:"https://example.com/liguria", d:"M202,990 L246,887 L323,881 L357,770 L446,749 L483,778 L515,722 L640,757 L628,799 L676,801 L769,897 L716,910 L639,853 L583,821 L579,835 L552,813 L512,801 L512,805 L494,798 L473,797 L408,839 L323,958 L234,992 L202,990 Z" },
+  { id:"lombardia", nombre:"Lombardía", grupo:"north", url:"https://example.com/lombardia", d:"M436,399 L473,288 L511,376 L538,378 L532,314 L586,255 L593,176 L633,173 L653,234 L743,211 L781,258 L791,203 L763,164 L807,134 L893,191 L855,328 L873,389 L941,375 L894,444 L907,522 L1023,591 L1016,607 L1036,608 L1038,619 L1070,635 L1072,637 L1072,640 L870,651 L750,585 L714,609 L653,585 L594,645 L603,718 L575,719 L505,607 L454,620 L424,565 L430,517 L461,537 L495,507 L436,399 Z M596,713 L595,715 L598,714 L596,713 Z M597,717 L598,717 L598,716 L597,717 Z" },
+  { id:"trentino", nombre:"Trentino-Alto Adigio", grupo:"north", url:"https://example.com/trentino", d:"M1216,122 L1162,172 L1150,217 L1189,274 L1130,297 L1128,335 L1035,349 L1007,417 L866,376 L869,221 L895,204 L841,128 L859,68 L982,95 L1014,35 L1251,0 L1233,51 L1307,121 L1243,147 L1216,122 Z" },
+  { id:"veneto", nombre:"Véneto", grupo:"north", url:"https://example.com/veneto", d:"M896,464 L941,375 L942,409 L1005,418 L1035,349 L1128,335 L1130,297 L1176,289 L1192,265 L1150,217 L1175,192 L1158,179 L1216,122 L1364,135 L1273,243 L1311,280 L1296,341 L1350,388 L1415,371 L1447,433 L1281,506 L1275,598 L1325,635 L1289,687 L1211,632 L1073,646 L916,538 L896,464 Z" },
+  { id:"friuli", nombre:"Friuli-Venecia Julia", grupo:"north", url:"https://example.com/friuli", d:"M1583,168 L1516,261 L1572,274 L1530,323 L1567,330 L1552,372 L1629,435 L1614,450 L1585,447 L1604,441 L1593,437 L1596,429 L1592,421 L1575,404 L1543,384 L1521,421 L1446,432 L1415,371 L1325,377 L1290,313 L1311,280 L1272,246 L1371,131 L1583,168 Z" },
+  { id:"emilia-romana", nombre:"Emilia-Romaña", grupo:"north", url:"https://example.com/emilia-romana", d:"M603,718 L594,645 L653,585 L714,609 L750,585 L880,652 L916,627 L1262,642 L1289,687 L1264,673 L1254,711 L1280,844 L1364,964 L1311,961 L1314,928 L1264,995 L1197,996 L1136,962 L1121,928 L1144,888 L1071,853 L1032,896 L886,890 L862,858 L756,808 L747,786 L628,799 L640,757 L575,740 L575,719 L603,718 Z M1252,982 L1242,993 L1254,989 L1252,982 Z" },
+  { id:"toscana", nombre:"Toscana", grupo:"center", url:"https://example.com/toscana", d:"M807,963 L684,815 L714,785 L956,906 L1071,853 L1145,889 L1121,928 L1141,966 L1216,1003 L1264,995 L1283,1012 L1206,1100 L1251,1136 L1184,1180 L1191,1264 L1145,1284 L1158,1329 L1106,1355 L1115,1394 L1031,1399 L1011,1417 L1017,1363 L917,1284 L926,1252 L865,1245 L871,1153 L819,1061 L807,963 Z M861,868 L861,868 L861,868 L861,868 Z" },
+  { id:"umbria", nombre:"Umbría", grupo:"center", url:"https://example.com/umbria", d:"M1459,1329 L1318,1416 L1246,1327 L1187,1320 L1181,1187 L1251,1136 L1207,1104 L1222,1068 L1280,1040 L1275,1068 L1373,1088 L1401,1236 L1479,1270 L1459,1329 Z" },
+  { id:"marcas", nombre:"Marcas", grupo:"center", url:"https://example.com/marcas", d:"M1373,1088 L1243,1035 L1283,1012 L1264,987 L1403,948 L1564,1060 L1629,1257 L1512,1319 L1466,1305 L1483,1282 L1477,1265 L1401,1236 L1373,1088 Z M1295,1042 L1295,1047 L1297,1047 L1295,1042 Z" },
+  { id:"lacio", nombre:"Lacio", grupo:"center", url:"https://example.com/lacio", d:"M1158,1283 L1246,1327 L1318,1416 L1495,1308 L1512,1348 L1467,1349 L1450,1392 L1509,1471 L1443,1472 L1430,1510 L1505,1548 L1509,1580 L1629,1610 L1653,1668 L1616,1700 L1623,1736 L1437,1758 L1339,1691 L1078,1412 L1157,1332 L1158,1283 Z M1345,1601 L1348,1604 L1346,1600 L1345,1601 Z M1303,1554 L1301,1553 L1300,1554 L1303,1554 Z" },
+  { id:"abruzo", nombre:"Abruzo", grupo:"south", url:"https://example.com/abruzo", d:"M1634,1619 L1509,1580 L1428,1503 L1443,1472 L1509,1471 L1458,1418 L1467,1349 L1509,1351 L1504,1316 L1543,1280 L1627,1257 L1672,1356 L1822,1515 L1757,1597 L1711,1552 L1691,1600 L1634,1619 Z" },
+  { id:"molise", nombre:"Molise", grupo:"south", url:"https://example.com/molise", d:"M1782,1716 L1675,1673 L1657,1707 L1634,1619 L1691,1600 L1711,1552 L1757,1597 L1821,1504 L1901,1547 L1907,1612 L1856,1639 L1872,1679 L1782,1716 Z" },
+  { id:"campania", nombre:"Campania", grupo:"south", url:"https://example.com/campania", d:"M1617,1699 L1782,1716 L1872,1679 L1933,1752 L1918,1780 L1993,1809 L1989,1853 L1946,1874 L2051,2043 L2022,2108 L1988,2103 L1965,2128 L1941,2115 L1931,2118 L1851,2052 L1870,2008 L1824,1926 L1756,1937 L1741,1942 L1720,1954 L1754,1916 L1752,1906 L1748,1899 L1708,1872 L1656,1887 L1658,1870 L1651,1846 L1594,1758 L1617,1699 Z" },
+  { id:"apulia", nombre:"Apulia", grupo:"south", url:"https://example.com/apulia", d:"M1934,1796 L1856,1639 L1907,1612 L1902,1547 L2113,1543 L2138,1586 L2072,1640 L2085,1686 L2338,1806 L2424,1876 L2505,1918 L2527,1919 L2657,2093 L2649,2102 L2647,2112 L2638,2118 L2632,2132 L2623,2187 L2586,2173 L2544,2134 L2543,2092 L2524,2070 L2524,2058 L2518,2050 L2520,2049 L2510,2040 L2431,2036 L2343,1969 L2287,2005 L2255,1981 L2242,1900 L2184,1913 L2065,1783 L1934,1796 Z M2236,1898 L2238,1899 L2239,1899 L2236,1898 Z" },
+  { id:"basilicata", nombre:"Basilicata", grupo:"south", url:"https://example.com/basilicata", d:"M2051,2043 L1950,1860 L1989,1853 L1996,1798 L2065,1783 L2184,1913 L2256,1911 L2255,1981 L2288,2006 L2238,2090 L2188,2082 L2173,2155 L2060,2123 L2040,2148 L2022,2116 L2015,2112 L2051,2043 Z" },
+  { id:"calabria", nombre:"Calabria", grupo:"south", url:"https://example.com/calabria", d:"M2143,2473 L2044,2137 L2172,2155 L2188,2082 L2234,2086 L2210,2225 L2353,2305 L2342,2393 L2364,2416 L2339,2457 L2231,2479 L2220,2599 L2109,2747 L2041,2750 L2013,2723 L2012,2658 L2048,2641 L2074,2591 L2057,2531 L2125,2509 L2143,2473 Z" },
+  { id:"sicilia", nombre:"Sicilia", grupo:"island", url:"https://example.com/sicilia", d:"M1403,2717 L1494,2658 L1590,2734 L1764,2712 L1852,2667 L1865,2679 L1892,2689 L1918,2669 L1925,2652 L1921,2644 L2017,2645 L1918,2798 L1890,2880 L1893,2930 L1928,2953 L1912,2954 L1912,2966 L1937,2993 L1932,3013 L1946,3023 L1932,3023 L1905,3051 L1892,3086 L1902,3120 L1889,3131 L1875,3114 L1757,3089 L1705,3007 L1620,2994 L1462,2877 L1306,2813 L1306,2801 L1296,2784 L1309,2763 L1303,2753 L1317,2722 L1311,2720 L1363,2669 L1403,2717 Z" },
+  { id:"cerdena", nombre:"Cerdeña", grupo:"island", url:"https://example.com/cerdena", d:"M415,2043 L373,1947 L340,1949 L353,1921 L337,1906 L356,1864 L352,1833 L374,1870 L418,1879 L483,1848 L566,1777 L562,1751 L657,1790 L643,1822 L656,1814 L679,1827 L667,1824 L661,1829 L659,1846 L648,1845 L644,1846 L642,1851 L693,1872 L683,1874 L680,1890 L698,1945 L708,1962 L715,1966 L670,2049 L695,2102 L684,2130 L664,2319 L665,2329 L672,2335 L647,2397 L578,2357 L539,2373 L536,2425 L533,2429 L530,2429 L509,2453 L505,2456 L499,2460 L498,2462 L468,2444 L450,2465 L425,2407 L397,2437 L385,2396 L411,2408 L416,2400 L389,2360 L404,2338 L403,2332 L400,2328 L401,2325 L390,2313 L392,2288 L434,2166 L396,2154 L417,2099 L415,2043 Z" }
+  ];
+
+  const svg = document.getElementById("svg-map");
+  const list = document.getElementById("list");
+
+  REGIONES.forEach(reg => {
+    const path = document.createElementNS("http://www.w3.org/2000/svg","path");
+    path.setAttribute("d", reg.d);
+    path.setAttribute("class", "region " + reg.grupo);
+    path.setAttribute("tabindex", "0");
+    path.setAttribute("role", "link");
+    path.setAttribute("aria-label", "Ir al sitio de " + reg.nombre);
+
+    const title = document.createElementNS("http://www.w3.org/2000/svg","title");
+    title.textContent = reg.nombre;
+    path.appendChild(title);
+
+    const go = () => window.open(reg.url, "_blank", "noopener");
+    path.addEventListener("click", go);
+    path.addEventListener("keydown", e => { if(e.key==="Enter"||e.key===" "){ e.preventDefault(); go(); } });
+
+    svg.appendChild(path);
+
+    const a = document.createElement("a");
+    a.href = reg.url; a.target = "_blank"; a.rel = "noopener";
+    a.textContent = reg.nombre;
+    list.appendChild(a);
+  });
+</script>
+
+</body>
+</html>

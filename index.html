@@ -1,180 +1,105 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es-AR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Sociedad Italiana de Socorros Mutuos</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sociedad Italiana de Socorros Mutuos — Gálvez</title>
+<meta name="description" content="Mutual Sociedad Italiana de Socorros Mutuos Italia Unida — Gálvez, Santa Fe.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Libre+Baskerville:ital@0;1&family=Oswald:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
-<script src="script.js" defer></script>
 </head>
 <body>
 
-<a class="skip" href="#contenido" data-i18n="skip">Ir al contenido</a>
+<a class="skip-link" href="#contenido">Saltar al contenido</a>
 
-<header class="top wrap">
-  <div class="head-row">
-    <div>
-      <p class="logo" data-i18n="orgName">Sociedad Italiana de Socorros Mutuos</p>
-      <div class="tri"></div>
-    </div>
+<!-- ======================= HEADER ======================= -->
+<header class="site-header" id="site-header">
+  <div class="wrap header-row">
+    <a href="#" class="brand" aria-label="Sociedad Italiana de Socorros Mutuos, inicio">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 48 48" width="40" height="40">
+          <circle cx="24" cy="24" r="22" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M11 30 L11 19 Q11 13 24 13 Q37 13 37 19 L37 30" fill="none" stroke="currentColor" stroke-width="2"/>
+          <line x1="8" y1="30" x2="40" y2="30" stroke="currentColor" stroke-width="2"/>
+        </svg>
+      </span>
+      <span class="brand-text">SOCIEDAD ITALIANA<br><small>DE SOCORROS MUTUOS · GÁLVEZ</small></span>
+    </a>
 
-    <div class="lang" role="group" aria-label="Idioma">
-      <button type="button" class="lang-btn" data-lang="es" aria-pressed="true">
-        <svg class="flag" viewBox="0 0 60 40" aria-hidden="true">
-          <rect width="60" height="40" fill="#75AADB"/>
-          <rect y="13.3" width="60" height="13.4" fill="#fff"/>
-          <circle cx="30" cy="20" r="4" fill="#F6B40E"/>
-        </svg>
-        <span>Español</span>
+    <div class="header-row-actions">
+      <button class="icon-btn" id="search-toggle" aria-expanded="false" aria-controls="search-bar" aria-label="Buscar en la página">
+        <svg viewBox="0 0 24 24" width="20" height="20"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><line x1="16.3" y1="16.3" x2="21" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
-      <button type="button" class="lang-btn" data-lang="en" aria-pressed="false">
-        <svg class="flag" viewBox="0 0 60 40" aria-hidden="true">
-          <defs><pattern id="stars" width="12" height="8" patternUnits="userSpaceOnUse"><circle cx="3" cy="2" r="1" fill="#fff"/><circle cx="9" cy="6" r="1" fill="#fff"/></pattern></defs>
-          <rect width="60" height="40" fill="#fff"/>
-          <rect y="0" width="60" height="3.1" fill="#B22234"/>
-          <rect y="6.2" width="60" height="3.1" fill="#B22234"/>
-          <rect y="12.3" width="60" height="3.1" fill="#B22234"/>
-          <rect y="18.5" width="60" height="3.1" fill="#B22234"/>
-          <rect y="24.6" width="60" height="3.1" fill="#B22234"/>
-          <rect y="30.8" width="60" height="3.1" fill="#B22234"/>
-          <rect y="36.9" width="60" height="3.1" fill="#B22234"/>
-          <rect width="26" height="21.5" fill="#3C3B6E"/>
-          <rect width="26" height="21.5" fill="url(#stars)"/>
-        </svg>
-        <span>English</span>
-      </button>
-      <button type="button" class="lang-btn" data-lang="it" aria-pressed="false">
-        <svg class="flag" viewBox="0 0 60 40" aria-hidden="true">
-          <rect width="20" height="40" fill="#009246"/>
-          <rect x="20" width="20" height="40" fill="#fff"/>
-          <rect x="40" width="20" height="40" fill="#CE2B37"/>
-        </svg>
-        <span>Italiano</span>
-      </button>
+
+      <div class="lang-switch">
+        <button class="icon-btn lang-btn" id="lang-toggle" aria-haspopup="true" aria-expanded="false" aria-controls="lang-menu" aria-label="Cambiar idioma">
+          <span id="lang-flag" aria-hidden="true">
+            <svg viewBox="0 0 30 20" width="26" height="18"><rect width="30" height="20" fill="#74ACDF"/><rect y="6.66" width="30" height="6.66" fill="#FFFFFF"/><circle cx="15" cy="10" r="2.6" fill="#F6B40E" stroke="#85340A" stroke-width="0.4"/></svg>
+          </span>
+        </button>
+        <ul class="lang-menu" id="lang-menu" hidden>
+          <li><button type="button" data-lang="es"><svg viewBox="0 0 30 20" width="22" height="15"><rect width="30" height="20" fill="#74ACDF"/><rect y="6.66" width="30" height="6.66" fill="#FFFFFF"/><circle cx="15" cy="10" r="2.4" fill="#F6B40E"/></svg> Español</button></li>
+          <li><button type="button" data-lang="en"><svg viewBox="0 0 30 20" width="22" height="15"><rect width="30" height="20" fill="#1A2B5C"/><rect y="8.5" width="30" height="3" fill="#fff"/><rect x="13.5" width="3" height="20" fill="#fff"/><rect y="9.3" width="30" height="1.4" fill="#C8102E"/><rect x="14.3" width="1.4" height="20" fill="#C8102E"/></svg> English</button></li>
+          <li><button type="button" data-lang="it"><svg viewBox="0 0 30 20" width="22" height="15"><rect width="10" height="20" fill="#008C45"/><rect x="10" width="10" height="20" fill="#F4F5F0"/><rect x="20" width="10" height="20" fill="#CD212A"/></svg> Italiano</button></li>
+        </ul>
+      </div>
     </div>
   </div>
 
-  <nav class="nav" aria-label="Principal">
-    <ul>
-      <li><a href="historia.html">
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="7" r="4"/><path d="M1 21c0-4.4 3.6-7 8-7s8 2.6 8 7z"/></svg>
-        <span data-i18n="navHistory">Historia</span></a></li>
-      <li><a href="consulado.html">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="1"/><circle cx="12" cy="10" r="3.5"/></svg>
-        <span data-i18n="navConsulate">Consulado</span></a></li>
-      <li><a href="cultura.html">
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 4h10v8a5 5 0 0 1-10 0z"/><path d="M13 7h3a2 2 0 0 1 0 4h-3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
-        <span data-i18n="navCulture">Cultura</span></a></li>
-      <li><a href="colabora.html">
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M2 12l5-5 4 2 3-2 8 6-4 4-3-2-2 2-4-3-3 2z"/></svg>
-        <span data-i18n="navCollab">Colaborá</span></a></li>
-    </ul>
+  <div class="wrap search-row" id="search-bar" hidden>
+    <form id="site-search-form" role="search" aria-label="Buscar en el sitio">
+      <input type="search" id="site-search-input" placeholder="Buscar en toda la página…" aria-label="Buscar">
+      <button type="submit">Buscar</button>
+    </form>
+    <p class="search-status" id="search-status" role="status" aria-live="polite"></p>
+  </div>
+
+  <nav class="icon-nav" id="main-nav" aria-label="Navegación principal">
+    <div class="wrap icon-nav-row">
+      <button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="nav-list" aria-label="Abrir menú">
+        <span class="nav-toggle-box"><span></span><span></span><span></span></span>
+      </button>
+
+      <ul id="nav-list">
+        <li><a href="#historia" data-i18n="nav.historia"><svg viewBox="0 0 24 24" width="18" height="18"><circle cx="12" cy="8" r="3.4" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M5 20c0-4 3-6.5 7-6.5s7 2.5 7 6.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>Historia</a></li>
+        <li><a href="#consulado" data-i18n="nav.consulado"><svg viewBox="0 0 24 24" width="18" height="18"><rect x="5" y="4" width="14" height="17" rx="1" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8.5 8h2M13.5 8h2M8.5 12h2M13.5 12h2M8.5 16h2M13.5 16h2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>Consulado</a></li>
+        <li><a href="#noticias" data-i18n="nav.cultura"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M7 4c1.6 2 1.6 4-1 6.5C9.5 13 12 16 9 20M17 4c-1.6 2-1.6 4 1 6.5C15.5 13 13 16 16 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Cultura</a></li>
+        <li><a href="#donar" data-i18n="nav.colabora"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M3 15l4-4 3 3 6-7 5 6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Colaborá</a></li>
+      </ul>
+
+      <button class="nav-close" id="nav-close" aria-label="Cerrar menú">
+        <svg viewBox="0 0 24 24" width="22" height="22"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
   </nav>
 </header>
 
 <main id="contenido">
-  <section class="hero wrap">
-    <div>
-      <h1 data-i18n-html="heroTitle">Creemos un mundo donde <em>nadie</em> quede atrás.</h1>
-      <p data-i18n="heroText">Sumate a nuestra causa y trabajemos juntos por el respeto y la igualdad de todos los seres humanos.</p>
-      <a class="btn" href="historia.html" data-i18n="heroBtn">Nuestra historia →</a>
-    </div>
-    <div class="hero-art" aria-hidden="true">
-      <div class="frame f2"><div class="pic">
-        <svg viewBox="0 0 300 225" preserveAspectRatio="xMidYMid slice"><g fill="#fff"><ellipse cx="200" cy="60" rx="34" ry="16"/><ellipse cx="222" cy="52" rx="24" ry="18"/></g><path d="M0 150Q80 118 160 146T300 136V225H0Z" fill="#c2e07e"/><path d="M0 178Q90 150 170 172T300 168V225H0Z" fill="#84a000"/></svg>
-      </div></div>
-      <div class="frame f1"><div class="pic">
-        <svg viewBox="0 0 300 225" preserveAspectRatio="xMidYMid slice"><g fill="#fff"><ellipse cx="120" cy="60" rx="34" ry="16"/><ellipse cx="142" cy="52" rx="24" ry="18"/><ellipse cx="60" cy="50" rx="18" ry="10"/></g><path d="M0 150Q80 118 160 146T300 136V225H0Z" fill="#c2e07e"/><path d="M0 178Q90 150 170 172T300 168V225H0Z" fill="#84a000"/></svg>
-      </div></div>
-    </div>
-  </section>
 
-  <section class="wrap" aria-label="Accesos rápidos">
-    <div class="tiles">
-      <a class="tile sug" href="sugerencias.html"><span data-i18n="tSug">Sugerencias</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="10.5"/><path d="M8 12h8m-3-3 3 3-3 3"/></svg></a>
-      <a class="tile hist" href="historia.html"><span data-i18n="tHist">Historia</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="10.5"/><path d="M8 12h8m-3-3 3 3-3 3"/></svg></a>
-      <a class="tile cons" href="consulado.html"><span data-i18n="tCons">Consulado y voto electoral</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="10.5"/><path d="M8 12h8m-3-3 3 3-3 3"/></svg></a>
-      <a class="tile noti" href="#noticias"><span data-i18n="tNoti">Noticias</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="10.5"/><path d="M8 12h8m-3-3 3 3-3 3"/></svg></a>
-      <a class="tile sobre" href="nosotros.html"><span data-i18n="tSobre">Sobre nosotros</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="10.5"/><path d="M8 12h8m-3-3 3 3-3 3"/></svg></a>
-      <a class="tile colab" href="colabora.html"><span data-i18n="tColab">Colaborá</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="10.5"/><path d="M8 12h8m-3-3 3 3-3 3"/></svg></a>
-      <a class="tile conv" href="socios.html"><span data-i18n="tConv">Convertite en socio</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="10.5"/><path d="M8 12h8m-3-3 3 3-3 3"/></svg></a>
-      <a class="tile cult" href="cultura.html"><span data-i18n="tCult">Cultura italiana</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="10.5"/><path d="M8 12h8m-3-3 3 3-3 3"/></svg></a>
-    </div>
-  </section>
-
-  <section class="section wrap" id="noticias">
-    <div class="sec-head">
-      <div>
-        <p class="eyebrow" data-i18n="newsEyebrow">Desde Italia</p>
-        <h2 data-i18n="newsTitle">Noticias de Italia</h2>
+  <!-- ======================= HERO ======================= -->
+  <section class="hero">
+    <div class="wrap hero-inner">
+      <div class="hero-copy">
+        <h1 class="hero-title">
+          <span data-i18n="hero.title1">Cultura.</span>
+          <span class="is-accent" data-i18n="hero.title2">Comunidad.</span>
+          <span data-i18n="hero.title3">Identidad.</span>
+        </h1>
+        <p class="hero-lede" data-i18n="hero.lede">Desde 1910 acompañamos a familias de origen italiano en Gálvez y la región: trámites consulares, clases de idioma, encuentros culturales y una red de socios que se cuida entre sí.</p>
+        <a href="#historia" class="btn btn-outline" data-i18n="hero.button">Nuestra historia →</a>
       </div>
-      <div class="filters" id="filters"></div>
-    </div>
-    <div class="news" id="news"></div>
-    <p class="note" data-i18n="newsNote">Titulares de ejemplo.</p>
-  </section>
 
-  <section class="section wrap">
-    <p class="eyebrow" data-i18n="socialEyebrow">Comunidad</p>
-    <h2 data-i18n="socialTitle">Seguinos en redes</h2>
-    <div class="social-grid">
-      <div>
-        <div class="panel-head">
-          <h3 data-i18n="fbTitle">Facebook</h3>
-          <a class="follow" id="fb-link" href="#" target="_blank" rel="noopener" data-i18n="viewPage">Ver página →</a>
-        </div>
-        <div id="fb-posts"></div>
-      </div>
-      <div>
-        <div class="panel-head">
-          <h3 data-i18n="igTitle">Instagram</h3>
-          <a class="follow" id="ig-link" href="#" target="_blank" rel="noopener" data-i18n="followUs">Seguinos →</a>
-        </div>
-        <div class="ig-grid" id="ig-grid"></div>
+      <div class="hero-art" aria-hidden="true">
+        <img class="hero-img hero-img-back" src="https://images.unsplash.com/photo-1662898290891-a6c7f022e851?auto=format&amp;fit=crop&amp;w=900&amp;q=70" alt="" loading="lazy">
+        <img class="hero-img hero-img-front" src="https://images.unsplash.com/photo-1414438992182-69e404046f80?auto=format&amp;fit=crop&amp;w=700&amp;q=70" alt="" loading="lazy">
       </div>
     </div>
   </section>
+
 </main>
 
-<footer class="foot">
-  <div class="tri"></div>
-  <div class="foot-grid">
-    <div>
-      <p class="logo" data-i18n="orgName">Sociedad Italiana de Socorros Mutuos</p>
-      <p data-i18n="footAbout">Trabajamos desde hace generaciones por la comunidad ítalo-argentina.</p>
-    </div>
-    <div>
-      <h4 data-i18n="fNav">Navegación</h4>
-      <ul>
-        <li><a href="historia.html" data-i18n="fHist">Historia</a></li>
-        <li><a href="consulado.html" data-i18n="fCons">Consulado y voto</a></li>
-        <li><a href="cultura.html" data-i18n="fCult">Cultura italiana</a></li>
-        <li><a href="#noticias" data-i18n="fNews">Noticias</a></li>
-        <li><a href="nosotros.html" data-i18n="fAbout">Sobre nosotros</a></li>
-      </ul>
-    </div>
-    <div>
-      <h4 data-i18n="fContact">Contacto</h4>
-      <ul>
-        <li data-i18n="fAddress">Dirección de la sociedad, Ciudad, Argentina</li>
-        <li data-i18n="fPhone">Tel: (011) 0000-0000</li>
-        <li><a href="mailto:contacto@sociedad.org.ar">contacto@sociedad.org.ar</a></li>
-      </ul>
-    </div>
-    <div>
-      <h4 data-i18n="fFollow">Seguinos</h4>
-      <ul>
-        <li><a href="#" data-link="fb" target="_blank" rel="noopener">Facebook</a></li>
-        <li><a href="#" data-link="ig" target="_blank" rel="noopener">Instagram</a></li>
-        <li><a href="sugerencias.html" data-i18n="fSugg">Dejá una sugerencia</a></li>
-      </ul>
-    </div>
-  </div>
-  <div class="copy" data-i18n="copy">© 2026 Sociedad Italiana de Socorros Mutuos. Todos los derechos reservados.</div>
-</footer>
-
+<script src="script.js"></script>
 </body>
 </html>
