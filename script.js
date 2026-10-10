@@ -1,310 +1,234 @@
-/* ==========================================================================
-   Sociedad Italiana de Socorros Mutuos (Gálvez) — interacciones
-   Primera sección: header + hero. JavaScript vanilla, sin dependencias.
-   ========================================================================== */
+/* ===== Configuración: reemplazar por los datos reales ===== */
+const SITE = {
+  fb: "https://www.facebook.com/",
+  ig: "https://www.instagram.com/"
+};
 
-document.addEventListener('DOMContentLoaded', () => {
-  initSearchToggle();
-  initPageSearch();
-  initLangSwitch();
-  initMobileNav();
-  initActiveNavLink();
-});
+/* Orden en que la bandera cambia al tocarla: Argentina → Italia → Estados Unidos */
+const LANG_ORDER = ["es", "it", "en"];
+const LANG_NAMES = { es: "Español", it: "Italiano", en: "English" };
+const LOCALES = { es: "es-AR", it: "it-IT", en: "en-US" };
 
-/* ==========================================================================
-   Buscador (mostrar / ocultar)
-   ========================================================================== */
-function initSearchToggle() {
-  const toggle = document.getElementById('search-toggle');
-  const bar = document.getElementById('search-bar');
-  if (!toggle || !bar) return;
-
-  toggle.addEventListener('click', () => {
-    const isOpen = toggle.getAttribute('aria-expanded') === 'true';
-    toggle.setAttribute('aria-expanded', String(!isOpen));
-    bar.hidden = isOpen;
-    if (!isOpen) {
-      const input = bar.querySelector('input');
-      if (input) input.focus();
-    }
-  });
-}
-
-/* ==========================================================================
-   Búsqueda real dentro de toda la página
-   ========================================================================== */
-function initPageSearch() {
-  const form = document.getElementById('site-search-form');
-  const input = document.getElementById('site-search-input');
-  const status = document.getElementById('search-status');
-  const root = document.getElementById('contenido');
-  if (!form || !input || !root) return;
-
-  form.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const query = input.value.trim();
-
-    clearHighlights(root);
-
-    if (!query) {
-      if (status) status.textContent = '';
-      return;
-    }
-
-    const { count, firstMark } = highlightMatches(root, query);
-
-    if (status) {
-      status.textContent = count > 0
-        ? `${count} resultado${count === 1 ? '' : 's'} encontrado${count === 1 ? '' : 's'}.`
-        : 'No se encontraron resultados.';
-    }
-
-    if (firstMark) {
-      firstMark.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  });
-}
-
-function clearHighlights(root) {
-  root.querySelectorAll('mark.search-hit').forEach((mark) => {
-    const parent = mark.parentNode;
-    parent.replaceChild(document.createTextNode(mark.textContent), mark);
-    parent.normalize();
-  });
-}
-
-function escapeRegExp(text) {
-  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-function highlightMatches(root, query) {
-  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
-    acceptNode(node) {
-      if (!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
-      const tag = node.parentNode && node.parentNode.nodeName;
-      if (['SCRIPT', 'STYLE', 'MARK', 'TITLE'].includes(tag)) return NodeFilter.FILTER_REJECT;
-      return NodeFilter.FILTER_ACCEPT;
-    },
-  });
-
-  const regex = new RegExp(escapeRegExp(query), 'gi');
-  const textNodes = [];
-  let node;
-  while ((node = walker.nextNode())) textNodes.push(node);
-
-  let count = 0;
-  let firstMark = null;
-
-  textNodes.forEach((textNode) => {
-    const text = textNode.nodeValue;
-    regex.lastIndex = 0;
-    if (!regex.test(text)) return;
-    regex.lastIndex = 0;
-
-    const frag = document.createDocumentFragment();
-    let lastIndex = 0;
-    let match;
-
-    while ((match = regex.exec(text))) {
-      if (match.index > lastIndex) {
-        frag.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
-      }
-      const mark = document.createElement('mark');
-      mark.className = 'search-hit';
-      mark.textContent = match[0];
-      frag.appendChild(mark);
-      if (!firstMark) firstMark = mark;
-      count += 1;
-      lastIndex = match.index + match[0].length;
-      if (match[0].length === 0) regex.lastIndex += 1;
-    }
-
-    if (lastIndex < text.length) {
-      frag.appendChild(document.createTextNode(text.slice(lastIndex)));
-    }
-
-    textNode.parentNode.replaceChild(frag, textNode);
-  });
-
-  return { count, firstMark };
-}
-
-/* ==========================================================================
-   Selector de idioma (Español / English / Italiano)
-   ========================================================================== */
-const translations = {
+/* ===== Textos de la interfaz ===== */
+const I18N = {
   es: {
-    'nav.historia': 'Historia',
-    'nav.consulado': 'Consulado',
-    'nav.cultura': 'Cultura',
-    'nav.colabora': 'Colaborá',
-    'hero.title1': 'Cultura.',
-    'hero.title2': 'Comunidad.',
-    'hero.title3': 'Identidad.',
-    'hero.lede': 'Desde 1910 acompañamos a familias de origen italiano en Gálvez y la región: trámites consulares, clases de idioma, encuentros culturales y una red de socios que se cuida entre sí.',
-    'hero.button': 'Nuestra historia →',
+    skip: "Ir al contenido",
+    orgName: "Sociedad Italiana de Socorros Mutuos",
+    navHistory: "Historia", navConsulate: "Consulado y voto electoral", navCulture: "Cultura italiana",
+    heroEyebrow: "Una comunidad que une",
+    heroTitle: 'Creemos un mundo donde <em>nadie</em> quede atrás.',
+    heroText: "Sumate a nuestra causa y trabajemos juntos por el respeto y la igualdad de todos los seres humanos.",
+    heroBtn: "Nuestra historia",
+    tSug: "Sugerencias", tHist: "Historia", tCons: "Consulado y voto electoral", tNoti: "Noticias",
+    tSobre: "Sobre nosotros", tColab: "Colaborá", tConv: "Convertite en socio", tCult: "Cultura italiana",
+    newsEyebrow: "Desde Italia", newsTitle: "Noticias de Italia", filterAll: "Todas",
+    newsNote: "Titulares de ejemplo. Para noticias en tiempo real, conectar los feeds RSS de cada medio.",
+    readIn: "Leer en",
+    socialEyebrow: "Comunidad", socialTitle: "Seguinos en redes",
+    fbTitle: "Facebook", igTitle: "Instagram", viewPage: "Ver página", followUs: "Seguinos",
+    comments: "comentarios", author: "Sociedad Italiana",
+    footAbout: "Trabajamos desde hace generaciones por la comunidad ítalo-argentina.",
+    fNav: "Navegación", fHist: "Historia", fCons: "Consulado y voto", fCult: "Cultura",
+    fNews: "Noticias", fAbout: "Sobre nosotros", fContact: "Contacto",
+    fAddress: "Dirección de la sociedad, Ciudad, Argentina", fPhone: "Tel: (011) 0000-0000",
+    fFollow: "Seguinos", fSugg: "Dejá una sugerencia",
+    copy: "© 2026 Sociedad Italiana de Socorros Mutuos. Todos los derechos reservados.",
+    moreNav: "Más opciones"
   },
   en: {
-    'nav.historia': 'History',
-    'nav.consulado': 'Consulate',
-    'nav.cultura': 'Culture',
-    'nav.colabora': 'Get involved',
-    'hero.title1': 'Culture.',
-    'hero.title2': 'Community.',
-    'hero.title3': 'Identity.',
-    'hero.lede': 'Since 1910 we have supported Italian-descendant families in Gálvez and the region: consular paperwork, language classes, cultural gatherings and a network of members who look out for one another.',
-    'hero.button': 'Our history →',
+    skip: "Skip to content",
+    orgName: "Italian Mutual Aid Society",
+    navHistory: "History", navConsulate: "Consulate and electoral vote", navCulture: "Italian culture",
+    heroEyebrow: "A community that unites",
+    heroTitle: 'We believe in a world where <em>no one</em> is left behind.',
+    heroText: "Join us in working for respect and equality for all human beings.",
+    heroBtn: "Our story",
+    tSug: "Suggestions", tHist: "History", tCons: "Consulate and electoral vote", tNoti: "News",
+    tSobre: "About us", tColab: "Get involved", tConv: "Become a member", tCult: "Italian culture",
+    newsEyebrow: "From Italy", newsTitle: "News from Italy", filterAll: "All",
+    newsNote: "Sample headlines. To show live news, connect each outlet's RSS feed.",
+    readIn: "Read on",
+    socialEyebrow: "Community", socialTitle: "Follow us on social media",
+    fbTitle: "Facebook", igTitle: "Instagram", viewPage: "Visit page", followUs: "Follow us",
+    comments: "comments", author: "Italian Society",
+    footAbout: "For generations we have worked for the Italian-Argentine community.",
+    fNav: "Menu", fHist: "History", fCons: "Consulate and vote", fCult: "Italian culture",
+    fNews: "News", fAbout: "About us", fContact: "Contact",
+    fAddress: "Society address, City, Argentina", fPhone: "Phone: (011) 0000-0000",
+    fFollow: "Follow us", fSugg: "Leave a suggestion",
+    copy: "© 2026 Italian Mutual Aid Society. All rights reserved.",
+    moreNav: "More options"
   },
   it: {
-    'nav.historia': 'Storia',
-    'nav.consulado': 'Consolato',
-    'nav.cultura': 'Cultura',
-    'nav.colabora': 'Collabora',
-    'hero.title1': 'Cultura.',
-    'hero.title2': 'Comunità.',
-    'hero.title3': 'Identità.',
-    'hero.lede': 'Dal 1910 accompagniamo le famiglie di origine italiana a Gálvez e nella regione: pratiche consolari, corsi di lingua, incontri culturali e una rete di soci che si prende cura gli uni degli altri.',
-    'hero.button': 'La nostra storia →',
-  },
+    skip: "Vai al contenuto",
+    orgName: "Società Italiana di Mutuo Soccorso",
+    navHistory: "Storia", navConsulate: "Consolato e voto elettorale", navCulture: "Cultura italiana",
+    heroEyebrow: "Una comunità che unisce",
+    heroTitle: 'Crediamo in un mondo dove <em>nessuno</em> venga lasciato indietro.',
+    heroText: "Unisciti a noi per lavorare insieme al rispetto e all'uguaglianza di tutti gli esseri umani.",
+    heroBtn: "La nostra storia",
+    tSug: "Suggerimenti", tHist: "Storia", tCons: "Consolato e voto elettorale", tNoti: "Notizie",
+    tSobre: "Chi siamo", tColab: "Collabora", tConv: "Diventa socio", tCult: "Cultura italiana",
+    newsEyebrow: "Dall'Italia", newsTitle: "Notizie dall'Italia", filterAll: "Tutte",
+    newsNote: "Titoli di esempio. Per notizie in tempo reale, collegare i feed RSS di ogni testata.",
+    readIn: "Leggi su",
+    socialEyebrow: "Comunità", socialTitle: "Seguici sui social",
+    fbTitle: "Facebook", igTitle: "Instagram", viewPage: "Vai alla pagina", followUs: "Seguici",
+    comments: "commenti", author: "Società Italiana",
+    footAbout: "Da generazioni lavoriamo per la comunità italo-argentina.",
+    fNav: "Menu", fHist: "Storia", fCons: "Consolato e voto", fCult: "Cultura italiana",
+    fNews: "Notizie", fAbout: "Chi siamo", fContact: "Contatti",
+    fAddress: "Indirizzo della società, Città, Argentina", fPhone: "Tel: (011) 0000-0000",
+    fFollow: "Seguici", fSugg: "Lascia un suggerimento",
+    copy: "© 2026 Società Italiana di Mutuo Soccorso. Tutti i diritti riservati.",
+    moreNav: "Altre opzioni"
+  }
 };
 
-const flagMarkup = {
-  es: '<svg viewBox="0 0 30 20" width="26" height="18"><rect width="30" height="20" fill="#74ACDF"/><rect y="6.66" width="30" height="6.66" fill="#FFFFFF"/><circle cx="15" cy="10" r="2.6" fill="#F6B40E" stroke="#85340A" stroke-width="0.4"/></svg>',
-  en: '<svg viewBox="0 0 30 20" width="26" height="18"><rect width="30" height="20" fill="#1A2B5C"/><rect y="8.5" width="30" height="3" fill="#fff"/><rect x="13.5" width="3" height="20" fill="#fff"/><rect y="9.3" width="30" height="1.4" fill="#C8102E"/><rect x="14.3" width="1.4" height="20" fill="#C8102E"/></svg>',
-  it: '<svg viewBox="0 0 30 20" width="26" height="18"><rect width="10" height="20" fill="#008C45"/><rect x="10" width="10" height="20" fill="#F4F5F0"/><rect x="20" width="10" height="20" fill="#CD212A"/></svg>',
-};
+/* ===== Contenido: cada texto tiene su versión en cada idioma ===== */
+const NEWS = [
+  { src:"ANSA", url:"https://www.ansa.it", date:"2026-10-02",
+    title:{ es:"Italia refuerza los programas de cooperación con América Latina",
+            en:"Italy strengthens cooperation programs with Latin America",
+            it:"L'Italia rafforza i programmi di cooperazione con l'America Latina" } },
+  { src:"Corriere", url:"https://www.corriere.it", date:"2026-10-02",
+    title:{ es:"El turismo de otoño supera las previsiones",
+            en:"Autumn tourism beats expectations",
+            it:"Il turismo autunnale supera le previsioni" } },
+  { src:"Repubblica", url:"https://www.repubblica.it", date:"2026-10-01",
+    title:{ es:"Elecciones regionales: así se perfila el escenario",
+            en:"Regional elections: the outlook so far",
+            it:"Elezioni regionali: lo scenario che si delinea" } },
+  { src:"Il Post", url:"https://www.ilpost.it", date:"2026-09-30",
+    title:{ es:"La gastronomía italiana, entre tradición e innovación",
+            en:"Italian cuisine between tradition and innovation",
+            it:"La cucina italiana tra tradizione e innovazione" } }
+];
 
-const htmlLang = { es: 'es-AR', en: 'en', it: 'it' };
+const FB_POSTS = [
+  { date:"2026-10-01", likes:128, comments:14,
+    text:{ es:"¡Gracias a todos los que nos acompañaron en la charla sobre ciudadanía italiana!",
+           en:"Thank you to everyone who joined our talk on Italian citizenship!",
+           it:"Grazie a tutti coloro che hanno partecipato all'incontro sulla cittadinanza italiana!" } },
+  { date:"2026-09-26", likes:214, comments:31,
+    text:{ es:"Este fin de semana celebramos la cultura italiana con música, comida y actividades para toda la familia.",
+           en:"This weekend we celebrate Italian culture with music, food and activities for the whole family.",
+           it:"Questo fine settimana festeggiamo la cultura italiana con musica, cibo e attività per tutta la famiglia." } }
+];
 
-function applyLanguage(lang) {
-  const dict = translations[lang];
-  if (!dict) return;
+/* img: opcional. Si ponés una ruta (ej. "img/ig1.jpg") la foto reemplaza el color de fondo */
+const IG_POSTS = [
+  { g:"#1E7F55", img:"", caption:{ es:"Tarde de cine italiano", en:"Italian film afternoon", it:"Pomeriggio di cinema italiano" } },
+  { g:"#B8323A", img:"", caption:{ es:"Clases de idioma", en:"Language classes", it:"Corsi di lingua" } },
+  { g:"#D9A23A", img:"", caption:{ es:"Colecta solidaria", en:"Solidarity drive", it:"Raccolta solidale" } },
+  { g:"#5b1020", img:"", caption:{ es:"Vino y tradición", en:"Wine and tradition", it:"Vino e tradizione" } },
+  { g:"#2b5ea8", img:"", caption:{ es:"Día de la familia", en:"Family day", it:"Giornata della famiglia" } },
+  { g:"#2e5e3a", img:"", caption:{ es:"Nuestra sede", en:"Our headquarters", it:"La nostra sede" } }
+];
 
-  document.querySelectorAll('[data-i18n]').forEach((el) => {
-    const key = el.getAttribute('data-i18n');
-    if (dict[key] !== undefined) el.textContent = dict[key];
-  });
+/* ===== Estado y utilidades ===== */
+let lang = "es";
+let filter = "all";
 
-  const flagSlot = document.getElementById('lang-flag');
-  if (flagSlot && flagMarkup[lang]) flagSlot.innerHTML = flagMarkup[lang];
+const $ = sel => document.querySelector(sel);
+const t = key => (I18N[lang] && I18N[lang][key]) ?? I18N.es[key];
+const L = obj => obj[lang] ?? obj.es;
+const fmtDate = iso => new Date(iso + "T12:00:00").toLocaleDateString(LOCALES[lang], { day:"numeric", month:"long", year:"numeric" });
+const ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>';
 
-  document.documentElement.lang = htmlLang[lang] || lang;
-  document.documentElement.setAttribute('data-lang', lang);
+/* ===== Render ===== */
+function applyStatic(){
+  document.documentElement.lang = lang;
+  document.title = t("orgName");
+  document.querySelectorAll("[data-i18n]").forEach(el => el.textContent = t(el.dataset.i18n));
+  document.querySelectorAll("[data-i18n-html]").forEach(el => el.innerHTML = t(el.dataset.i18nHtml));
+
+  document.querySelectorAll("[data-flag]").forEach(f => f.hidden = f.dataset.flag !== lang);
+  $("#lang-btn").setAttribute("aria-label", `Cambiar idioma. Actual: ${LANG_NAMES[lang]}`);
+  $("#burger").setAttribute("aria-label", t("moreNav"));
+
+  document.querySelector("#fb-link").href = SITE.fb;
+  document.querySelector("#ig-link").href = SITE.ig;
+  document.querySelectorAll("[data-link='fb']").forEach(a => a.href = SITE.fb);
+  document.querySelectorAll("[data-link='ig']").forEach(a => a.href = SITE.ig);
 }
 
-function initLangSwitch() {
-  const toggle = document.getElementById('lang-toggle');
-  const menu = document.getElementById('lang-menu');
-  if (!toggle || !menu) return;
-
-  const closeMenu = () => {
-    menu.hidden = true;
-    toggle.setAttribute('aria-expanded', 'false');
-  };
-  const openMenu = () => {
-    menu.hidden = false;
-    toggle.setAttribute('aria-expanded', 'true');
-  };
-
-  toggle.addEventListener('click', () => {
-    menu.hidden ? openMenu() : closeMenu();
-  });
-
-  menu.querySelectorAll('button[data-lang]').forEach((button) => {
-    button.addEventListener('click', () => {
-      applyLanguage(button.dataset.lang);
-      closeMenu();
-    });
-  });
-
-  document.addEventListener('click', (event) => {
-    if (!menu.hidden && !menu.contains(event.target) && event.target !== toggle && !toggle.contains(event.target)) {
-      closeMenu();
-    }
-  });
-
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && !menu.hidden) {
-      closeMenu();
-      toggle.focus();
-    }
-  });
+function renderFilters(){
+  const keys = ["all", ...new Set(NEWS.map(n => n.src))];
+  $("#filters").innerHTML = keys.map(k =>
+    `<button type="button" data-src="${k}" aria-pressed="${k === filter}">${k === "all" ? t("filterAll") : k}</button>`
+  ).join("");
 }
 
-/* ==========================================================================
-   Menú móvil a pantalla completa
-   ========================================================================== */
-function initMobileNav() {
-  const toggle = document.getElementById('nav-toggle');
-  const close = document.getElementById('nav-close');
-  const list = document.getElementById('nav-list');
-  if (!toggle || !list) return;
-
-  const closeNav = () => {
-    list.classList.remove('is-open');
-    toggle.setAttribute('aria-expanded', 'false');
-    if (close) close.classList.remove('is-visible');
-    document.body.style.overflow = '';
-  };
-
-  const openNav = () => {
-    list.classList.add('is-open');
-    toggle.setAttribute('aria-expanded', 'true');
-    if (close) close.classList.add('is-visible');
-    document.body.style.overflow = 'hidden';
-  };
-
-  toggle.addEventListener('click', () => {
-    list.classList.contains('is-open') ? closeNav() : openNav();
-  });
-
-  if (close) close.addEventListener('click', closeNav);
-
-  list.querySelectorAll('a').forEach((link) => {
-    link.addEventListener('click', () => {
-      if (window.matchMedia('(max-width: 760px)').matches) closeNav();
-    });
-  });
-
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && list.classList.contains('is-open')) {
-      closeNav();
-      toggle.focus();
-    }
-  });
-
-  window.addEventListener('resize', () => {
-    if (window.matchMedia('(min-width: 761px)').matches) closeNav();
-  });
+function renderNews(){
+  const items = NEWS.filter(n => filter === "all" || n.src === filter);
+  $("#news").innerHTML = items.map(n => {
+    const d = new Date(n.date + "T12:00:00");
+    const day = d.getDate();
+    const month = d.toLocaleDateString(LOCALES[lang], { month:"short" }).replace(".", "");
+    return `
+    <a class="row" href="${n.url}" target="_blank" rel="noopener" aria-label="${t("readIn")} ${n.src}">
+      <div class="dt"><span class="date-n">${day}</span><span class="date-m">${month}</span></div>
+      <div><p class="meta">${n.src}</p><h3 class="row-t">${L(n.title)}</h3></div>
+      <span class="arr" aria-hidden="true">${ARROW}</span>
+    </a>`;
+  }).join("");
 }
 
-/* ==========================================================================
-   Resaltar el link activo del nav según la sección visible
-   (queda listo para cuando se agreguen las próximas secciones)
-   ========================================================================== */
-function initActiveNavLink() {
-  const navLinks = Array.from(document.querySelectorAll('#nav-list a'));
-  if (!navLinks.length || !('IntersectionObserver' in window)) return;
+function renderSocial(){
+  $("#fb-posts").innerHTML = FB_POSTS.map(p => `
+    <article class="post">
+      <div class="who"><span class="av">S</span><div>${t("author")}<small>${fmtDate(p.date)}</small></div></div>
+      <p>${L(p.text)}</p>
+      <div class="react">♥ ${p.likes} · ${p.comments} ${t("comments")}</div>
+    </article>`).join("");
 
-  const sections = navLinks
-    .map((link) => document.querySelector(link.getAttribute('href')))
-    .filter(Boolean);
-  if (!sections.length) return;
-
-  const setActive = (id) => {
-    navLinks.forEach((link) => {
-      link.classList.toggle('is-active', link.getAttribute('href') === `#${id}`);
-    });
-  };
-
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) setActive(entry.target.id);
-      });
-    },
-    { rootMargin: '-45% 0px -50% 0px', threshold: 0 }
-  );
-
-  sections.forEach((section) => observer.observe(section));
+  $("#ig-grid").innerHTML = IG_POSTS.map(p => {
+    const bg = p.img ? `url('${p.img}') center/cover no-repeat` : p.g;
+    return `<a class="ig" href="${SITE.ig}" target="_blank" rel="noopener" style="background:${bg}"><span>${L(p.caption)}</span></a>`;
+  }).join("");
 }
+
+function render(){
+  applyStatic();
+  renderFilters();
+  renderNews();
+  renderSocial();
+}
+
+/* ===== Eventos ===== */
+// Cada toque en la bandera pasa al siguiente idioma: Argentina → Italia → Estados Unidos → Argentina
+$("#lang-btn").addEventListener("click", () => {
+  const i = LANG_ORDER.indexOf(lang);
+  lang = LANG_ORDER[(i + 1) % LANG_ORDER.length];
+  try { localStorage.setItem("lang", lang); } catch(_) {}
+  render();
+  const btn = $("#lang-btn");
+  btn.classList.remove("pop");
+  void btn.offsetWidth; // reinicia la animación aunque se toque varias veces seguidas
+  btn.classList.add("pop");
+});
+
+// Botón "más opciones": muestra u oculta el menú secundario del encabezado
+$("#burger").addEventListener("click", () => {
+  const moreNav = $("#more-nav");
+  const show = moreNav.hidden;
+  moreNav.hidden = !show;
+  $("#burger").setAttribute("aria-expanded", String(show));
+});
+
+$("#filters").addEventListener("click", e => {
+  const btn = e.target.closest("[data-src]");
+  if(!btn) return;
+  filter = btn.dataset.src;
+  renderFilters();
+  renderNews();
+});
+
+/* ===== Inicio: recordar el último idioma elegido ===== */
+try {
+  const saved = localStorage.getItem("lang");
+  if(saved && I18N[saved]) lang = saved;
+} catch(_) {}
+
+render();
